@@ -11,4 +11,4 @@ def identity(payload):
     return UserModel.find_by_id(user_id)
 
 def crypt(password):
-    return bcrypt.hashpw(password.encode("UTF-8"), bcrypt.gensalt(14))
+    return bcrypt.hashpw(password, bcrypt.gensalt(14))
