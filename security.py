@@ -12,6 +12,3 @@ def identity(payload):
 
 def crypt(password):
     return bcrypt.hashpw(password.encode("UTF-8"), bcrypt.gensalt(14))
-
-def decrypt(password, password2):
-    return bcrypt.checkpw(password.encode("UTF-8"), password2)
