@@ -4,7 +4,7 @@ class ItemModle(db.Model):
     __tablename__ = 'items'
 
     id = db.Column(db.Integer, primary_key=True)
-    item_name = db.Column(db.String(80))
+    item_name = db.Column(db.String(20))
     price = db.Column(db.Float(precision=2))
     created_timestamp = db.Column(db.Float)
     modify_timestamp = db.Column(db.Float)
