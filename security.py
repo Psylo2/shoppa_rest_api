@@ -3,7 +3,7 @@ import bcrypt
 
 def authenticate(username, password):
     user = UserModel.find_by_username(username)
-    if user and bcrypt.checkpw(password.encode("UTF-8"), user.password):
+    if user and bcrypt.checkpw(password.encode("UTF-8"), user.password.encode("UTF-8")):
         return user
 
 def identity(payload):
