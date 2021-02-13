@@ -5,7 +5,7 @@ class UserModel(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20))
-    password = db.Column(db.String)
+    password = db.Column(db.BLOB())
     registered_timestamp = db.Column(db.Float)
 
     def __init__(self, username, password, registered_timestamp):
