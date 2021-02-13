@@ -10,7 +10,7 @@ class UserModel(db.Model):
 
     def __init__(self, username, password, registered_timestamp):
         self.username = username
-        self.password = password.encode('UTF-8')
+        self.password = password
         self.registered_timestamp = registered_timestamp
 
 

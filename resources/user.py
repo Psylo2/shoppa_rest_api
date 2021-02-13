@@ -14,7 +14,7 @@ class UserRegister(Resource):
         if UserModel.find_by_username(data['username']):
             return {"message": "Username already Taken!"}, 400
 
-        user = UserModel(data['username'], crypt(data['password']), insert_timestamp())
+        user = UserModel(data['username'], crypt(data['password'].encode('UTF-8')), insert_timestamp())
         user.save_to_db()
         return {'message': "User created!"}, 201
 
