@@ -1,11 +1,12 @@
-from security import crypt
 from models.user import UserModel
 from flask_restful import Resource, reqparse
-from db.db import insert_timestamp
+from flask_jwt import jwt_required
+from db.db import insert_timestamp, encrypt
 
 class UserRegister(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('username', type=str, required=True, help="this field cannot be blank.")
+    parser.add_argument('email', type=str, required=True, help="this field cannot be blank.")
     parser.add_argument('password', type=str, required=True, help="this field cannot be blank.")
 
     def post(self):
@@ -13,11 +14,21 @@ class UserRegister(Resource):
 
         if UserModel.find_by_username(data['username']):
             return {"message": "Username already Taken!"}, 400
+        if UserModel.find_by_email(data['email']):
+            return {"message": "Email already Taken!"}, 400
 
-        user = UserModel(data['username'], crypt(data['password']), insert_timestamp())
+        user = UserModel(data['username'], data['email'], encrypt(data['password']), insert_timestamp())
         user.save_to_db()
         return {'message': "User created!"}, 201
 
+    @jwt_required()
+    def delete(self, name):
+        user = UserModel.find_by_name(name)
+        if user:
+            user.delete_from_db()
+            return {'message': 'Item deleted'}
+
 class UserList(Resource):
+    @jwt_required()
     def get(self):
         return {'users': [user.json() for user in UserModel.query.all()]}

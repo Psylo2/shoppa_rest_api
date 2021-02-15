@@ -3,8 +3,8 @@ from db.db import db, convert_timestamp
 class StoreModle(db.Model):
     __tablename__ = 'stores'
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(20))
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(20), unique=True)
     created_timestamp = db.Column(db.Float)
     modify_timestamp = db.Column(db.Float)
 
@@ -17,13 +17,17 @@ class StoreModle(db.Model):
 
 
     def json(self):
-        return {'name': self.name, 'created_at': convert_timestamp(self.created_timestamp),
+        return {'id': self.id, 'name': self.name, 'created_at': convert_timestamp(self.created_timestamp),
                 'last_modified': convert_timestamp(self.modify_timestamp),
                 'items': [item.json() for item in self.items.all()]}
 
     @classmethod
     def find_by_name(cls, name):
         return cls.query.filter_by(name=name).first()
+
+    @classmethod
+    def find_by_id(cls, _id):
+        return cls.query.filter_by(id=_id).first()
 
     def save_to_db(self):
         db.session.add(self)
