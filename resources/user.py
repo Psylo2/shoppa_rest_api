@@ -29,6 +29,5 @@ class UserRegister(Resource):
             return {'message': 'Item deleted'}
 
 class UserList(Resource):
-    @jwt_required()
     def get(self):
         return {'users': [user.json() for user in UserModel.query.all()]}
