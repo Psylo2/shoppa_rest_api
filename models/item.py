@@ -9,9 +9,8 @@ class ItemModle(db.Model):
     created_timestamp = db.Column(db.Float)
     modify_timestamp = db.Column(db.Float)
     store_id = db.Column(db.Integer, db.ForeignKey('stores.id'))
-    store = db.relation('StoreModle')
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    user = db.relationship('ItemModle')
+    store = db.relationship('StoreModle')
+    user = db.relationship('UserModel', lazy='dynamic')
 
     def __init__(self, item_name, price, created_timestamp, modify_timestamp, store_id):
         self.item_name = item_name
@@ -25,7 +24,7 @@ class ItemModle(db.Model):
         return {'id': self.id, 'item_name': self.item_name, 'price': self.price,
                 'created_at': convert_timestamp(self.created_timestamp),
                 'last_modified': convert_timestamp(self.modify_timestamp),
-                'store_id': self.store_id, 'user_id': self.user_id }
+                'store_id': self.store_id, 'user': self.user}
 
     @classmethod
     def find_by_name(cls, item_name):

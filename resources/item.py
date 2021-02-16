@@ -83,6 +83,6 @@ class ItemToCart(Resource):
             return {'message': 'Item not found'}, 404
         if user is None:
             return {'message': 'User not found'}, 404
-        item.user_id = user.id
+        item.user = user
         item.save_to_db()
         return item.json()
