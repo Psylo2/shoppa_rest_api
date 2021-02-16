@@ -25,14 +25,19 @@ class UserList(Resource):
     def get(self):
         return {'users': [user.json() for user in UserModel.query.all()]}
 
-class UserDel(Resource):
+class User(Resource):
     parser = reqparse.RequestParser()
-    parser.add_argument('content', type=str, required=True)
+    parser.add_argument('content', type=str, required=False)
 
     @jwt_required()
     def delete(self):
         data = UserRegister.parser.parse_args()
-        user= UserModel.find_by_name(data['content'])
+        user = UserModel.find_by_name(data['content'])
         if user:
             user.delete_from_db()
             return {'message': 'Item deleted'}
+        user = UserModel.find_by_email(data['content'])
+        if user:
+            user.delete_from_db()
+            return {'message': 'Item deleted'}
+        return {'message': 'user not found'}, 400
