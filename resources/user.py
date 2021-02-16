@@ -28,11 +28,7 @@ class UserList(Resource):
 class User(Resource):
     @jwt_required()
     def delete(self, content):
-        user = UserModel.find_by_name(content)
-        if user:
-            user.delete_from_db()
-            return {'message': 'User deleted'}
-        user = UserModel.find_by_email(content)
+        user = UserModel.find_by_id(content)
         if user:
             user.delete_from_db()
             return {'message': 'User deleted'}
