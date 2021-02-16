@@ -3,7 +3,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_jwt import JWT
 from security import authenticate, identity
-from resources.user import UserRegister, UserList, UserDel
+from resources.user import UserRegister, UserList,
 from resources.item import Item, ItemList
 from resources.store import Store, StoreList
 
@@ -19,7 +19,7 @@ jwt = JWT(app, authenticate, identity)
 api.add_resource(Store, '/store/<string:name>')
 api.add_resource(Item, '/item/<string:item_name>')
 api.add_resource(UserRegister, '/register')
-api.add_resource(UserDel, '/user_del')
+api.add_resource(User, '/user_del')
 api.add_resource(ItemList, '/items')
 api.add_resource(UserList, '/users')
 api.add_resource(StoreList, '/stores')
