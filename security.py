@@ -14,4 +14,4 @@ def identity(payload):
     return UserModel.find_by_id(user_id)
 
 def decrypt(x, y):
-    return bcrypt.checkpw(x.encode("UTF-8"), y.password)
+    return bcrypt.checkpw(x.encode("UTF-8"), y)
