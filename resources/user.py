@@ -21,13 +21,18 @@ class UserRegister(Resource):
         user.save_to_db()
         return {'message': "User created!"}, 201
 
-    @jwt_required()
-    def delete(self, name):
-        user = UserModel.find_by_name(name)
-        if user:
-            user.delete_from_db()
-            return {'message': 'Item deleted'}
-
 class UserList(Resource):
     def get(self):
         return {'users': [user.json() for user in UserModel.query.all()]}
+
+class UserDel(Resource):
+    parser = reqparse.RequestParser()
+    parser.add_argument('content', type=str, required=True)
+
+    @jwt_required()
+    def delete(self):
+        data = UserRegister.parser.parse_args()
+        user= UserModel.find_by_name(data['content'])
+        if user:
+            user.delete_from_db()
+            return {'message': 'Item deleted'}

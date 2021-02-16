@@ -12,7 +12,8 @@ class UserModel(db.Model):
     bin_username = db.Column(db.LargeBinary)
     bin_email = db.Column(db.LargeBinary)
 
-
+    item_id = db.Column(db.Integer, db.ForeignKey('items.id'))
+    items = db.relationship('ItemModle')
 
     def __init__(self, username, email, password, registered_timestamp):
         self.username = username
@@ -22,13 +23,11 @@ class UserModel(db.Model):
         self.bin_username = encrypt(username)
         self.bin_email = encrypt(email)
 
-
-
-
     def json(self):
         return {'id': self.id, 'bin_username': str(self.bin_username), 'password': str(self.password),
                 'bin_email': str(self.bin_email), 'registered_at': convert_timestamp(self.registered_timestamp),
-                'username': self.username, 'email': self.email}
+                'username': self.username, 'email': self.email,
+                'cart': [item.json() for item in self.items.all()]}
 
     @classmethod
     def find_by_username(cls, username):
