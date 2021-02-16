@@ -1,6 +1,5 @@
 from models.user import UserModel
 from flask_restful import Resource, reqparse
-from flask_jwt import jwt_required
 from db.db import insert_timestamp, encrypt
 
 class UserRegister(Resource):
@@ -26,12 +25,18 @@ class UserList(Resource):
         return {'users': [user.json() for user in UserModel.query.all()]}
 
 class User(Resource):
-    @jwt_required()
-    def delete(self, content):
-        user = UserModel.find_by_id(content)
-        if user:
-            user.delete_from_db()
-            return {'message': 'User deleted'}
-        return {'message': 'user not found'}, 400
+    @classmethod
+    def get(cls, user_id):
+        user = UserModel.find_by_id(user_id)
+        if not user:
+            return {'message': 'User not found'}, 404
+        return user.json()
 
+    @classmethod
+    def delete(cls, user_id):
+        user = UserModel.find_by_id(user_id)
+        if not user:
+            return {'message': 'User not found'}, 404
+        user.delete_from_db(user_id)
+        return {'message': 'User deleted.'}, 200
 
