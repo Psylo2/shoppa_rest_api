@@ -2,7 +2,6 @@ from flask_restful import Resource, reqparse
 from flask_jwt import jwt_required
 from db.db import insert_timestamp
 from models.item import ItemModle
-from models.user import UserModel
 
 class Item(Resource):
     parser = reqparse.RequestParser()
@@ -61,28 +60,3 @@ class ItemList(Resource):
     @jwt_required()
     def get(self):
         return {'items': [item.json() for item in ItemModle.query.all()]}
-
-class ItemToCart(Resource):
-    parser = reqparse.RequestParser()
-    parser.add_argument('item_name',
-                        type=str,
-                        required=True,
-                        help="Every item need a store id"
-                        )
-    parser.add_argument('username',
-                        type=str,
-                        required=True,
-                        help="Every item need a store id"
-                        )
-    @jwt_required()
-    def post(self):
-        data = Item.parser.parse_args()
-        item = ItemModle.find_by_name(data['item_name'])
-        user = UserModel.find_by_name(data['username'])
-        if item is None:
-            return {'message': 'Item not found'}, 404
-        if user is None:
-            return {'message': 'User not found'}, 404
-        item.user = user
-        item.save_to_db()
-        return item.json()
