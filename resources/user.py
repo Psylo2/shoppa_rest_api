@@ -5,8 +5,8 @@ from db.db import insert_timestamp, encrypt
 
 class UserRegister(Resource):
     parser = reqparse.RequestParser()
-    parser.add_argument('username', type=str, required=True, help="this field cannot be blank.")
-    parser.add_argument('email', type=str, required=True, help="this field cannot be blank.")
+    parser.add_argument('username', type=str, required=False)
+    parser.add_argument('email', type=str, required=False)
     parser.add_argument('password', type=str, required=True, help="this field cannot be blank.")
 
     def post(self):
