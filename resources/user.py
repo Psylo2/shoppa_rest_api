@@ -1,13 +1,15 @@
-from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required
+from flask_jwt import jwt_required
 from flask_restful import Resource, reqparse
 from models.user import UserModel
 from db.db import insert_timestamp, decrypt
 
+
 class UserRegister(Resource):
     parser = reqparse.RequestParser()
+    parser.add_argument()
     parser.add_argument('username',
                         type=str,
-                        required=True,
+                        required=False,
                         help="this field cannot be blank.")
     parser.add_argument('password',
                         type=str,
@@ -15,7 +17,7 @@ class UserRegister(Resource):
                         help="this field cannot be blank.")
     parser.add_argument('email',
                         type=str,
-                        required=True,
+                        required=False,
                         help="this field cannot be blank.")
 
     def post(self):
@@ -29,7 +31,7 @@ class UserRegister(Resource):
         return {'message': "User created!"}, 201
 
 class UserList(Resource):
-    @jwt_required
+    @jwt_required()
     def get(self):
         return {'users': [user.json() for user in UserModel.query.all()]}
 
@@ -48,35 +50,3 @@ class User(Resource):
             return {'message': 'User not found'}, 404
         UserModel.delete_from_db(user)
         return {'message': 'User deleted.'}, 200
-
-class UserLogin(Resource):
-    parser = reqparse.RequestParser()
-    parser.add_argument('username_email',
-                        type=str,
-                        required=True,
-                        help="this field cannot be blank.")
-    parser.add_argument('password',
-                        type=str,
-                        required=True,
-                        help="this field cannot be blank.")
-
-    def post(self):
-        data = UserLogin.parser.parse_args()
-        user = UserModel.find_by_username(data['username_email'])
-        if user and decrypt(data['password'], user.password):
-            access_token = create_access_token(identity=user.id)
-            refresh_token = create_refresh_token(identity=user.id)
-            return {
-                        'access_token': access_token,
-                        'refresh_token': refresh_token
-                   }, 200
-
-        user = UserModel.find_by_email(data['username_email'])
-        if user and decrypt(data['password'], user.password):
-            access_token = create_access_token(identity=user.id, fresh=True)
-            refresh_token = create_refresh_token(identity=user.id)
-            return {
-                       'access_token': access_token,
-                       'refresh_token': refresh_token
-                   }, 200
-        return {'message': 'Invalid credentials2'}, 401
