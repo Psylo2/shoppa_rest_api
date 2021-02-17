@@ -15,7 +15,7 @@ app.secret_key = 'pablo'
 
 api = Api(app)
 
-jwt = JWTManager(app)
+jwt = JWTManager(app=app)
 
 api.add_resource(Store, '/store/<string:name>')
 api.add_resource(StoreList, '/stores')
