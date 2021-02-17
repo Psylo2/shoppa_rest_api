@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///db/data.db')
 app.config['PROPAGATE_EXCEPTIONS'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# app.config['JWT_SECRET_KEY'] = pablo
+app.config['JWT_SECRET_KEY'] = "pablo"
 app.secret_key = 'pablo'
 
 api = Api(app)
