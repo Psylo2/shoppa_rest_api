@@ -1,7 +1,7 @@
 from flask_restful import Resource, reqparse
-from flask_jwt_extended import jwt_required
 from db.db import insert_timestamp
 from models.item import ItemModel
+from flask_jwt import jwt_required
 
 class Item(Resource):
     parser = reqparse.RequestParser()

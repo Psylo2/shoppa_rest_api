@@ -1,5 +1,5 @@
 from flask_restful import Resource
-from flask_jwt_extended import jwt_required
+from flask_jwt import jwt_required
 from models.store import StoreModel
 from db.db import insert_timestamp
 
