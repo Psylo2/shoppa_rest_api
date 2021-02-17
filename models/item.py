@@ -1,6 +1,6 @@
 from db.db import db, convert_timestamp
 
-class ItemModle(db.Model):
+class ItemModel(db.Model):
     __tablename__ = 'items'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -9,7 +9,7 @@ class ItemModle(db.Model):
     created_timestamp = db.Column(db.Float)
     modify_timestamp = db.Column(db.Float)
     store_id = db.Column(db.Integer, db.ForeignKey('stores.id'))
-    store = db.relationship('StoreModle')
+    store = db.relationship('StoreModel')
 
     def __init__(self, item_name, price, created_timestamp, modify_timestamp, store_id):
         self.item_name = item_name
