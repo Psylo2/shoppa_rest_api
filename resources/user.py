@@ -35,14 +35,14 @@ class UserList(Resource):
 
 class User(Resource):
     @classmethod
-    def get(cls, user_id):
+    def get(cls, user_id: int):
         user = UserModel.find_by_id(user_id)
         if not user:
             return {'message': 'User not found'}, 404
         return user.json()
 
     @classmethod
-    def delete(cls, user_id):
+    def delete(cls, user_id: int):
         user = UserModel.find_by_id(user_id)
         if not user:
             return {'message': 'User not found'}, 404
@@ -68,7 +68,7 @@ class UserLogin(Resource):
             if not user:
                 return {'message': 'Invalid credentials1'}, 401
         if user and decrypt(data['password'], user.password):
-            access_token = create_access_token(identity=user.id, fresh=True)
+            access_token = create_access_token(identity=user.id)
             refresh_token = create_refresh_token(identity=user.id)
             return {
                         'access_token': access_token,
