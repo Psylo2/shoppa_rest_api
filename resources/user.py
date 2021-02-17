@@ -59,14 +59,14 @@ class UserLogin(Resource):
                         required=True,
                         help="this field cannot be blank.")
 
-
-    def post(self):
-        data = UserLogin.parser.parse_args()
+    @classmethod
+    def post(cls):
+        data = cls.parser.parse_args()
         user = UserModel.find_by_username(data['username_email'])
-        if not user:
+        if user is None:
             user = UserModel.find_by_email(data['username_email'])
             if user and decrypt(data['password'], user.password):
-                access_token = create_access_token(identity=data, fresh=True)
+                access_token = create_access_token(identity=user.id, fresh=True)
                 refresh_token = create_access_token(user.id)
                 return {
                     'access_token': access_token,
