@@ -16,7 +16,7 @@ class Item(Resource):
         help="Every item need a store id"
     )
 
-    @jwt_required()
+    @jwt_required
     def get(self, item_name):
         item = ItemModle.find_by_name(item_name)
         if item:
@@ -35,14 +35,14 @@ class Item(Resource):
             return {"message": "An error occurred inserting the Item."}, 500
         return item.json(), 201
 
-    @jwt_required()
+    @jwt_required
     def delete(self, item_name):
         item = ItemModle.find_by_name(item_name)
         if item:
             item.delete_from_db()
             return {'message': 'Item deleted'}
 
-    @jwt_required()
+    @jwt_required
     def put(self, item_name):
         data = Item.parser.parse_args()
         item = ItemModle.find_by_name(item_name)
@@ -57,6 +57,6 @@ class Item(Resource):
         return item.json()
 
 class ItemList(Resource):
-    @jwt_required()
+    @jwt_required
     def get(self):
         return {'items': [item.json() for item in ItemModle.query.all()]}
