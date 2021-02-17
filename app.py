@@ -22,7 +22,7 @@ api.add_resource(StoreList, '/stores')
 api.add_resource(Item, '/item/<string:item_name>')
 api.add_resource(ItemList, '/items')
 api.add_resource(User, '/user/<int:user_id>')
-api.add_resource(UserLogin, '/auth')
+api.add_resource(UserLogin, '/login')
 api.add_resource(UserRegister, '/register')
 api.add_resource(UserList, '/users')
 

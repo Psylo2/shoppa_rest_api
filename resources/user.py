@@ -1,4 +1,4 @@
-from flask_jwt_extended import create_access_token, create_refresh_token
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required
 from flask_restful import Resource, reqparse
 from models.user import UserModel
 from db.db import insert_timestamp, encrypt, decrypt
@@ -29,6 +29,7 @@ class UserRegister(Resource):
         return {'message': "User created!"}, 201
 
 class UserList(Resource):
+    @jwt_required()
     def get(self):
         return {'users': [user.json() for user in UserModel.query.all()]}
 
