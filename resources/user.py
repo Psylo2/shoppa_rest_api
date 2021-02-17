@@ -63,15 +63,20 @@ class UserLogin(Resource):
     def post(self):
         data = UserLogin.parser.parse_args()
         user = UserModel.find_by_username(data['username_email'])
-        # if not user:
-        #     user = UserModel.find_by_email(data['username_email'])
-        #     if not user:
-        #         return {'message': 'Invalid credentials1'}, 401
         if user and decrypt(data['password'], user.password):
             access_token = create_access_token(identity=user.id)
             refresh_token = create_refresh_token(identity=user.id)
             return {
                         'access_token': access_token,
                         'refresh_token': refresh_token
+                   }, 200
+
+        user = UserModel.find_by_email(data['username_email'])
+        if user and decrypt(data['password'], user.password):
+            access_token = create_access_token(identity=user.id, fresh=True)
+            refresh_token = create_refresh_token(identity=user.id)
+            return {
+                       'access_token': access_token,
+                       'refresh_token': refresh_token
                    }, 200
         return {'message': 'Invalid credentials2'}, 401
