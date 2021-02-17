@@ -15,7 +15,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'pablo'
 
 api = Api(app)
-db.init_app(app)
 
 jwt = JWTManager(app=app)
 
@@ -30,5 +29,5 @@ api.add_resource(UserList, '/users')
 
 
 if __name__ == '__main__':
-
+    db.init_app(app)
     app.run(port=5000, debug=True)
