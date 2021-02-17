@@ -1,5 +1,5 @@
-from db.db import db, convert_timestamp
-from security import crypt
+from db.db import db, convert_timestamp, encrypt
+
 
 class UserModel(db.Model):
     __tablename__ = 'users'
@@ -15,10 +15,10 @@ class UserModel(db.Model):
     def __init__(self, username, email, password, registered_timestamp):
         self.username = username
         self.email = email
-        self.password = crypt(password)
+        self.password = encrypt(password)
         self.registered_timestamp = registered_timestamp
-        self.hash_username = crypt(username)
-        self.hash_email = crypt(email)
+        self.hash_username = encrypt(username)
+        self.hash_email = encrypt(email)
 
     def json(self):
         return {'id': self.id, 'hash_username': str(self.hash_username), 'password': str(self.password),
