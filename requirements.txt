@@ -7,4 +7,4 @@ datetime
 tzlocal
 uwsgi
 psycopg2
-Flask-JWT-Extended
+Flask-JWT
