@@ -14,8 +14,8 @@ def convert_timestamp(timestamp):
     utc_date = pytz.utc.localize(datetime.datetime.utcfromtimestamp(timestamp))  # timestamp to UTC time
     return str(utc_date.astimezone(pytz.timezone(get_localzone().zone)))  # UTC to local time
 
-def encrypt(content):
-    return bcrypt.hashpw(content.encode("UTF-8"), bcrypt.gensalt(14))
+def encrypt(x):
+    return bcrypt.hashpw(x.encode("UTF-8"), bcrypt.gensalt(14))
 
-def decrypt(content, content2):
-    return bcrypt.checkpw(content.encode("UTF-8"), content2)
+def decrypt(x, y):
+    return bcrypt.checkpw(x.encode("UTF-8"), y)
