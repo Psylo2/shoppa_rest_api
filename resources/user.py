@@ -63,7 +63,7 @@ class UserLogin(Resource):
     def post(cls):
         data = cls.parser.parse_args()
         user = UserModel.find_by_username(data['username_email'])
-        if user is None:
+        if not user:
             user = UserModel.find_by_email(data['username_email'])
             if user and decrypt(data['password'], user.password):
                 access_token = create_access_token(identity=user.id, fresh=True)
