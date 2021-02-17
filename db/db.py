@@ -16,3 +16,6 @@ def convert_timestamp(timestamp):
 
 def encrypt(content):
     return bcrypt.hashpw(content.encode("UTF-8"), bcrypt.gensalt(14))
+
+def decrypt(content, content2):
+    return bcrypt.checkpw(content.encode("UTF-8"), content2)

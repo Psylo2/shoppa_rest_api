@@ -8,20 +8,20 @@ class UserModel(db.Model):
     email = db.Column(db.String(20), unique=True)
     registered_timestamp = db.Column(db.Float)
     last_login_timestamp = db.Column(db.Float)
-    bin_username = db.Column(db.LargeBinary)
-    bin_email = db.Column(db.LargeBinary)
+    hash_username = db.Column(db.LargeBinary)
+    hash_email = db.Column(db.LargeBinary)
 
     def __init__(self, username, email, password, registered_timestamp):
         self.username = username
         self.email = email
         self.password = password
         self.registered_timestamp = registered_timestamp
-        self.bin_username = encrypt(username)
-        self.bin_email = encrypt(email)
+        self.hash_username = encrypt(username)
+        self.hash_email = encrypt(email)
 
     def json(self):
-        return {'id': self.id, 'bin_username': str(self.bin_username), 'password': str(self.password),
-                'bin_email': str(self.bin_email), 'registered_at': convert_timestamp(self.registered_timestamp),
+        return {'id': self.id, 'hash_username': str(self.hash_username), 'password': str(self.password),
+                'hash_email': str(self.hash_email), 'registered_at': convert_timestamp(self.registered_timestamp),
                 'username': self.username, 'email': self.email}
 
     def save_to_db(self):
