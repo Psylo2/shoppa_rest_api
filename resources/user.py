@@ -1,4 +1,4 @@
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, create_refresh_token
 from flask_restful import Resource, reqparse
 from models.user import UserModel
 from db.db import insert_timestamp, encrypt, decrypt
@@ -67,7 +67,7 @@ class UserLogin(Resource):
             user = UserModel.find_by_email(data['username_email'])
             if user and decrypt(data['password'], user.password):
                 access_token = create_access_token(identity=user.id, fresh=True)
-                refresh_token = create_access_token(user.id)
+                refresh_token = create_refresh_token(user.id)
                 return {
                     'access_token': access_token,
                     'refresh_token': refresh_token
