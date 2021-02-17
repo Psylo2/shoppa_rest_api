@@ -4,7 +4,7 @@ import bcrypt
 def authenticate(username, password):
     user = UserModel.find_by_username(username)
     if user:
-        if decrypt(username, user.username) and decrypt(password, user.password):
+        if decrypt(username, user.hash_username) and decrypt(password, user.password):
             return user
 
 def identity(payload):

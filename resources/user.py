@@ -6,7 +6,7 @@ from db.db import insert_timestamp
 
 class UserRegister(Resource):
     parser = reqparse.RequestParser()
-    parser.add_argument()
+
     parser.add_argument('username',
                         type=str,
                         required=True,
