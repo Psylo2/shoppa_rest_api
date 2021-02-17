@@ -59,8 +59,8 @@ class UserLogin(Resource):
                         required=True,
                         help="this field cannot be blank.")
 
-    @classmethod
-    def post(cls):
+
+    def post(self):
         data = UserLogin.parser.parse_args()
         user = UserModel.find_by_username(data['username_email'])
         if not user:
