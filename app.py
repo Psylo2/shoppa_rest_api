@@ -2,6 +2,7 @@ import os
 from flask import Flask
 from flask_restful import Api
 from flask_jwt import JWT
+from security import authenticate, identity
 from resources.user import User, UserRegister, UserList
 from resources.item import Item, ItemList
 from resources.store import Store, StoreList
@@ -13,7 +14,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'pablo'
 
 api = Api(app)
-jwt = JWT(app)
+jwt = JWT(app, authenticate, identity)
 
 api.add_resource(Store, '/store/<string:name>')
 api.add_resource(StoreList, '/stores')
