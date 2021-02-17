@@ -9,11 +9,11 @@ class UserRegister(Resource):
                         type=str,
                         required=True,
                         help="this field cannot be blank.")
-    parser.add_argument('email',
+    parser.add_argument('password',
                         type=str,
                         required=True,
                         help="this field cannot be blank.")
-    parser.add_argument('password',
+    parser.add_argument('email',
                         type=str,
                         required=True,
                         help="this field cannot be blank.")
@@ -29,7 +29,7 @@ class UserRegister(Resource):
         return {'message': "User created!"}, 201
 
 class UserList(Resource):
-    @jwt_required()
+    @jwt_required
     def get(self):
         return {'users': [user.json() for user in UserModel.query.all()]}
 
@@ -60,27 +60,18 @@ class UserLogin(Resource):
                         required=True,
                         help="this field cannot be blank.")
 
-
     def post(self):
         data = UserLogin.parser.parse_args()
         user = UserModel.find_by_username(data['username_email'])
+        if not user:
+            user = UserModel.find_by_email(data['username_email'])
+            if not user:
+                return {'message': 'Invalid credentials1'}, 401
         if user and decrypt(data['password'], user.password):
             access_token = create_access_token(identity=user.id, fresh=True)
-            refresh_token = create_refresh_token(user.id)
-            return {
-                       'access_token': access_token,
-                       'refresh_token': refresh_token
-                   }, 200
-        user = UserModel.find_by_email(data['username_email'])
-        if user and decrypt(data['password'], user.password):
-            access_token = create_access_token(identity=user.id, fresh=True)
-            refresh_token = create_refresh_token(user.id)
+            refresh_token = create_refresh_token(identity=user.id)
             return {
                         'access_token': access_token,
                         'refresh_token': refresh_token
                    }, 200
-        return {'message': 'Invalid credentials'}, 401
-
-
-
-
+        return {'message': 'Invalid credentials2'}, 401
