@@ -14,7 +14,7 @@ class UserModel(db.Model):
     def __init__(self, username, email, password, registered_timestamp):
         self.username = username
         self.email = email
-        self.password = password
+        self.password = encrypt(password)
         self.registered_timestamp = registered_timestamp
         self.hash_username = encrypt(username)
         self.hash_email = encrypt(email)

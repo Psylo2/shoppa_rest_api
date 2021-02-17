@@ -24,7 +24,7 @@ class UserRegister(Resource):
             return {"message": "Username already Taken!"}, 400
         if UserModel.find_by_email(data['email']):
             return {"message": "Email already Taken!"}, 400
-        user = UserModel(data['username'], data['email'], encrypt(data['password']), insert_timestamp())
+        user = UserModel(data['username'], data['email'], data['password'], insert_timestamp())
         user.save_to_db()
         return {'message': "User created!"}, 201
 
@@ -63,15 +63,21 @@ class UserLogin(Resource):
     def post(cls):
         data = cls.parser.parse_args()
         user = UserModel.find_by_username(data['username_email'])
-        if not user:
-            user = UserModel.find_by_email(data['username_email'])
-            if user and decrypt(data['password'], user.password):
-                access_token = create_access_token(identity=user.id, fresh=True)
-                refresh_token = create_refresh_token(user.id)
-                return {
-                    'access_token': access_token,
-                    'refresh_token': refresh_token
-                }, 200
+        if user and decrypt(data['password'], user.password):
+            access_token = create_access_token(identity=user.id, fresh=True)
+            refresh_token = create_refresh_token(user.id)
+            return {
+                       'access_token': access_token,
+                       'refresh_token': refresh_token
+                   }, 200
+        user = UserModel.find_by_email(data['username_email'])
+        if user and decrypt(data['password'], user.password):
+            access_token = create_access_token(identity=user.id, fresh=True)
+            refresh_token = create_refresh_token(user.id)
+            return {
+                        'access_token': access_token,
+                        'refresh_token': refresh_token
+                   }, 200
         return {'message': 'Invalid credentials'}, 401
 
 
