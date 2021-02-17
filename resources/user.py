@@ -50,24 +50,24 @@ class User(Resource):
 
 class UserLogin(Resource):
     parser = reqparse.RequestParser()
-    parser.add_argument('password',
+    parser.add_argument('username_email',
                         type=str,
                         required=True,
                         help="this field cannot be blank.")
-    parser.add_argument('username_email',
+    parser.add_argument('password',
                         type=str,
                         required=True,
                         help="this field cannot be blank.")
 
     @classmethod
     def post(cls):
-        data = cls.parser.parse_args()
+        data = UserLogin.parser.parse_args()
         user = UserModel.find_by_username(data['username_email'])
         if not user:
             user = UserModel.find_by_email(data['username_email'])
-            if user and decrypt(user.password, data['password']):
+            if user and decrypt(data['password'], user.password):
                 access_token = create_access_token(identity=data, fresh=True)
-                refresh_token= create_access_token(user.id)
+                refresh_token = create_access_token(user.id)
                 return {
                     'access_token': access_token,
                     'refresh_token': refresh_token
