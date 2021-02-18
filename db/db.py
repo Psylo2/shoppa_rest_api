@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import pytz
 from tzlocal import get_localzone
 import datetime
+
 db = SQLAlchemy()
 
 def insert_timestamp():
