@@ -1,8 +1,8 @@
 from flask_jwt import jwt_required
 from flask_restful import Resource, reqparse
 from models.user import UserModel
+from models.item import ItemModel
 from db.db import insert_timestamp
-
 
 class UserRegister(Resource):
     parser = reqparse.RequestParser()
@@ -25,7 +25,9 @@ class UserRegister(Resource):
             return {"message": "Username already Taken!"}, 400
         if UserModel.find_by_email(data['email']):
             return {"message": "Email already Taken!"}, 400
-        user = UserModel(data['username'], data['email'], data['password'], insert_timestamp())
+        user = UserModel(data['username'], data['email'], data['password'],
+                         insert_timestamp())
+        user.registered_timestamp = insert_timestamp()
         user.save_to_db()
         return {'message': "User created!"}, 201
 
@@ -49,3 +51,51 @@ class User(Resource):
             return {'message': 'User not found'}, 404
         UserModel.delete_from_db(user)
         return {'message': 'User deleted.'}, 200
+
+class UserGetItem(Resource):
+    parser = reqparse.RequestParser()
+    parser.add_argument('username_email',
+                        type=str,
+                        required=True,
+                        help="Every User needs a NAME"
+                        )
+    parser.add_argument('item_name',
+                        type=str,
+                        required=False,
+                        help="Every Store needs a NAME"
+                        )
+
+    @jwt_required()
+    def get(self):
+        data = UserGetItem.parser.parse_args()
+        user = UserModel.find_by_username(data['username_email'])
+        if not user:
+            user = UserModel.find_by_email(data['username_email'])
+            if not user:
+                return {'message': 'User or Item not found'}, 404
+        return user.json_item()
+
+    @jwt_required()
+    def post(self):
+        data = UserGetItem.parser.parse_args()
+        user = UserModel.find_by_username(data['username_email'])
+        if not user:
+            user = User.find_by_email(data['username_email'])
+        item = ItemModel.find_by_name(data['item_name'])
+        if not user or not item:
+            return {'message': 'User or Item not found'}, 404
+        item.user_id = user.id
+        item.save_to_db()
+        return {'message': "Item- '{}' is now IN '{}'s CART".format(item.item_name, user.username)}
+    @jwt_required()
+    def delete(self):
+        data = UserGetItem.parser.parse_args()
+        user = UserModel.find_by_username(data['username_email'])
+        if not user:
+            user = UserModel.find_by_email(data['username_email'])
+        item = ItemModel.find_by_name(data['item_name'])
+        if not user or not item:
+            return {'message': 'User or Item not found'}, 404
+        item.user_id = None
+        item.save_to_db()
+        return {'message': "Item- '{}' is now DELETED '{}'s CART".format(item.item_name, user.username)}

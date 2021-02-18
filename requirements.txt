@@ -1,4 +1,5 @@
 Flask
+Flask-JWT
 Flask-RESTful
 Flask-SQLAlchemy
 bcrypt
@@ -7,4 +8,3 @@ datetime
 tzlocal
 uwsgi
 psycopg2
-Flask-JWT

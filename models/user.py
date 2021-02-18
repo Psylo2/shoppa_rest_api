@@ -1,29 +1,25 @@
 from db.db import db, convert_timestamp, encrypt
 
-
 class UserModel(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(20), unique=True)
     password = db.Column(db.LargeBinary)
-    email = db.Column(db.String(20), unique=True)
+    email = db.Column(db.String(25), unique=True)
     registered_timestamp = db.Column(db.Float)
     last_login_timestamp = db.Column(db.Float)
-    hash_username = db.Column(db.LargeBinary)
-    hash_email = db.Column(db.LargeBinary)
 
-    def __init__(self, username, email, password, registered_timestamp):
+    def __init__(self, username, email, password, last_login_timestamp):
         self.username = username
         self.email = email
         self.password = encrypt(password)
-        self.registered_timestamp = registered_timestamp
-        self.hash_username = encrypt(username)
-        self.hash_email = encrypt(email)
+        self.last_login_timestamp = last_login_timestamp
 
     def json(self):
-        return {'id': self.id, 'hash_username': str(self.hash_username), 'password': str(self.password),
-                'hash_email': str(self.hash_email), 'registered_at': convert_timestamp(self.registered_timestamp),
-                'username': self.username, 'email': self.email}
+        return {'id': self.id, 'username': str(encrypt(self.username)),
+                'email': str(encrypt(self.email)), 'password': str(self.password),
+                'registered_at': convert_timestamp(self.registered_timestamp),
+                'last_login_timestamp ': convert_timestamp(self.last_login_timestamp)}
 
     def save_to_db(self):
         db.session.add(self)
