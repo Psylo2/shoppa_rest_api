@@ -43,9 +43,10 @@ class Item(Resource):
     def delete(self):
         data = Item.parser.parse_args()
         item = ItemModel.find_by_name(data['item_name'])
-        if item:
+        if item and (item.user_id is None):
             item.delete_from_db()
             return {'message': 'Item deleted'}
+        return {"message": "Item is either taken by user or not found."}, 401
 
     @jwt_required()
     def put(self):

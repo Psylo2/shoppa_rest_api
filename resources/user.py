@@ -119,3 +119,16 @@ class UserCart(Resource):
         if not user:
             return {'message': 'User not found'}, 404
         return {'items': [item.json() for item in ItemModel.find_cart(user.id)]}
+
+    def get(self):
+        data = UserCart.parser.parse_args()
+        user = UserModel.find_by_username(data['username_email'])
+        if not user:
+            user = UserModel.find_by_email(data['username_email'])
+        if not user:
+            return {'message': 'User not found'}, 404
+        return {
+            'user_id': user.id,
+            'total_value': ItemModel.sum_cart_by_user_id(user.id)
+        }
+

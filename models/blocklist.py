@@ -1,5 +1,5 @@
 from typing import Dict
-from db.db import db, convert_timestamp, encrypt
+from db.db import db, convert_timestamp
 
 class BlockListModel(db.Model):
     __tablename__ = 'blocklist'
@@ -24,7 +24,7 @@ class BlockListModel(db.Model):
         db.session.commit()
 
     @classmethod
-    def find_by_user_id(cls, user_id: int):
+    def find_by_user_id(cls, user_id: int) -> "BlockListModel":
         return cls.query.filter_by(user_id=user_id).first()
 
 

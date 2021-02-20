@@ -1,4 +1,4 @@
-from sqlalchemy import update
+from sqlalchemy import func
 
 from db.db import db, convert_timestamp
 from typing import Dict
@@ -27,20 +27,24 @@ class ItemModel(db.Model):
                 'store_id': self.store_id, 'user_id': self.user_id}
 
     @classmethod
-    def find_by_name(cls, item_name: str):
+    def find_by_name(cls, item_name: str) -> "ItemModel":
         return cls.query.filter_by(item_name=item_name).first()
 
     @classmethod
-    def find_by_id(cls, _id: int):
+    def find_by_id(cls, _id: int) -> "ItemModel":
         return cls.query.filter_by(id=_id).first()
 
     @classmethod
-    def find_cart(cls, _id: int):
+    def find_cart(cls, _id: int) -> "ItemModel":
         return cls.query.filter_by(user_id=_id).all()
 
     @classmethod
-    def update_user_id(cls, _id):
+    def update_user_id(cls, _id) -> "ItemModel":
         return cls.query.filter_by(user_id=_id).update({ItemModel.user_id: None})
+
+    @classmethod
+    def sum_cart_by_user_id(cls, _id: int) -> "ItemModel":
+        return cls.query.with_entities(func.sum(ItemModel.price)).filter_by(user_id=_id).all()
 
     def save_to_db(self) -> None:
         db.session.add(self)

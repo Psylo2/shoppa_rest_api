@@ -1,4 +1,5 @@
 from db.db import db, convert_timestamp, encrypt
+
 class UserModel(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -30,13 +31,15 @@ class UserModel(db.Model):
         db.session.commit()
 
     @classmethod
-    def find_by_username(cls, username: str):
+    def find_by_username(cls, username: str) -> "UserModel":
         return cls.query.filter_by(username=username).first()
 
     @classmethod
-    def find_by_email(cls, email: str):
+    def find_by_email(cls, email: str) -> "UserModel":
         return cls.query.filter_by(email=email).first()
 
     @classmethod
-    def find_by_id(cls, _id: int):
+    def find_by_id(cls, _id: int) -> "UserModel":
         return cls.query.filter_by(id=_id).first()
+
+

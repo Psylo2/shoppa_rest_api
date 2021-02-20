@@ -17,17 +17,17 @@ class StoreModel(db.Model):
         self.modify_timestamp = modify_timestamp
 
 
-    def json(self) -> Dict:
+    def json(self):
         return {'id': self.id, 'name': self.name, 'created_at': convert_timestamp(self.created_timestamp),
                 'last_modified': convert_timestamp(self.modify_timestamp),
                 'items': [item.json() for item in self.items.all()]}
 
     @classmethod
-    def find_by_name(cls, name: str):
+    def find_by_name(cls, name: str) -> "StoreModel":
         return cls.query.filter_by(name=name).first()
 
     @classmethod
-    def find_by_id(cls, _id: str):
+    def find_by_id(cls, _id: str) -> "StoreModel":
         return cls.query.filter_by(id=_id).first()
 
     def save_to_db(self) -> None:
