@@ -1,4 +1,5 @@
 from db.db import db, convert_timestamp
+from typing import Dict
 
 class StoreModel(db.Model):
     __tablename__ = 'stores'
@@ -10,30 +11,30 @@ class StoreModel(db.Model):
 
     items = db.relationship('ItemModel', lazy='dynamic')
 
-    def __init__(self, name, created_timestamp, modify_timestamp):
+    def __init__(self, name: str, created_timestamp: float, modify_timestamp: float):
         self.name = name
         self.created_timestamp = created_timestamp
         self.modify_timestamp = modify_timestamp
 
 
-    def json(self):
+    def json(self) -> Dict:
         return {'id': self.id, 'name': self.name, 'created_at': convert_timestamp(self.created_timestamp),
                 'last_modified': convert_timestamp(self.modify_timestamp),
                 'items': [item.json() for item in self.items.all()]}
 
     @classmethod
-    def find_by_name(cls, name):
+    def find_by_name(cls, name: str):
         return cls.query.filter_by(name=name).first()
 
     @classmethod
-    def find_by_id(cls, _id):
+    def find_by_id(cls, _id: str):
         return cls.query.filter_by(id=_id).first()
 
-    def save_to_db(self):
+    def save_to_db(self) -> None:
         db.session.add(self)
         db.session.commit()
 
-    def delete_from_db(self):
+    def delete_from_db(self) -> None:
         db.session.delete(self)
         db.session.commit()
 

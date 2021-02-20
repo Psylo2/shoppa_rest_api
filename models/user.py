@@ -1,5 +1,4 @@
 from db.db import db, convert_timestamp, encrypt
-
 class UserModel(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -9,34 +8,35 @@ class UserModel(db.Model):
     registered_timestamp = db.Column(db.Float)
     last_login_timestamp = db.Column(db.Float)
 
-    def __init__(self, username, email, password, last_login_timestamp):
+
+    def __init__(self, username: str, email: str, password: str, last_login_timestamp: float):
         self.username = username
         self.email = email
         self.password = encrypt(password)
         self.last_login_timestamp = last_login_timestamp
 
-    def json(self):
+    def json(self) :
         return {'id': self.id, 'username': str(encrypt(self.username)),
                 'email': str(encrypt(self.email)), 'password': str(self.password),
                 'registered_at': convert_timestamp(self.registered_timestamp),
                 'last_login_timestamp ': convert_timestamp(self.last_login_timestamp)}
 
-    def save_to_db(self):
+    def save_to_db(self) -> None:
         db.session.add(self)
         db.session.commit()
 
-    def delete_from_db(self):
+    def delete_from_db(self) -> None:
         db.session.delete(self)
         db.session.commit()
 
     @classmethod
-    def find_by_username(cls, username):
+    def find_by_username(cls, username: str):
         return cls.query.filter_by(username=username).first()
 
     @classmethod
-    def find_by_email(cls, email):
+    def find_by_email(cls, email: str):
         return cls.query.filter_by(email=email).first()
 
     @classmethod
-    def find_by_id(cls, _id):
+    def find_by_id(cls, _id: int):
         return cls.query.filter_by(id=_id).first()

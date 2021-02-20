@@ -3,6 +3,7 @@ from flask_restful import Resource, reqparse
 from models.user import UserModel
 from models.item import ItemModel
 from db.db import insert_timestamp
+from models.blocklist import BlockListModel
 
 class UserRegister(Resource):
     parser = reqparse.RequestParser()
@@ -49,6 +50,7 @@ class User(Resource):
         user = UserModel.find_by_id(user_id)
         if not user:
             return {'message': 'User not found'}, 404
+        ItemModel.update_user_id(user_id)
         UserModel.delete_from_db(user)
         return {'message': 'User deleted.'}, 200
 
@@ -87,6 +89,7 @@ class UserGetItem(Resource):
         item.user_id = user.id
         item.save_to_db()
         return {'message': "Item- '{}' is now IN '{}'s CART".format(item.item_name, user.username)}
+
     @jwt_required()
     def delete(self):
         data = UserGetItem.parser.parse_args()
@@ -99,3 +102,20 @@ class UserGetItem(Resource):
         item.user_id = None
         item.save_to_db()
         return {'message': "Item- '{}' is now DELETED '{}'s CART".format(item.item_name, user.username)}
+
+class UserCart(Resource):
+    parser = reqparse.RequestParser()
+    parser.add_argument('username_email',
+                        type=str,
+                        required=True,
+                        help="Every User needs a USERNAME / EMAIL"
+                        )
+
+    def post(self):
+        data = UserCart.parser.parse_args()
+        user = UserModel.find_by_username(data['username_email'])
+        if not user:
+            user = UserModel.find_by_email(data['username_email'])
+        if not user:
+            return {'message': 'User not found'}, 404
+        return {'items': [item.json() for item in ItemModel.find_cart(user.id)]}

@@ -1,4 +1,7 @@
+from sqlalchemy import update
+
 from db.db import db, convert_timestamp
+from typing import Dict
 
 class ItemModel(db.Model):
     __tablename__ = 'items'
@@ -12,34 +15,38 @@ class ItemModel(db.Model):
     store = db.relationship('StoreModel')
     user_id = db.Column(db.Integer)
 
-    def __init__(self, item_name, price, modify_timestamp):
+    def __init__(self, item_name: str, price: float, modify_timestamp: float):
         self.item_name = item_name
         self.price = price
         self.modify_timestamp = modify_timestamp
 
-    def json(self):
+    def json(self) -> Dict:
         return {'id': self.id, 'item_name': self.item_name, 'price': self.price,
                 'created_at': convert_timestamp(self.created_timestamp),
                 'last_modified': convert_timestamp(self.modify_timestamp),
                 'store_id': self.store_id, 'user_id': self.user_id}
 
     @classmethod
-    def find_by_name(cls, item_name):
+    def find_by_name(cls, item_name: str):
         return cls.query.filter_by(item_name=item_name).first()
 
     @classmethod
-    def find_by_id(cls, _id):
+    def find_by_id(cls, _id: int):
         return cls.query.filter_by(id=_id).first()
 
     @classmethod
-    def find_cart(cls, _id):
+    def find_cart(cls, _id: int):
         return cls.query.filter_by(user_id=_id).all()
 
-    def save_to_db(self):
+    @classmethod
+    def update_user_id(cls, _id):
+        return cls.query.filter_by(user_id=_id).update({ItemModel.user_id: None})
+
+    def save_to_db(self) -> None:
         db.session.add(self)
         db.session.commit()
 
-    def delete_from_db(self):
+    def delete_from_db(self) -> None:
         db.session.delete(self)
         db.session.commit()
 

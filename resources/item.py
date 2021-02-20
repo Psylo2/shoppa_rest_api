@@ -7,9 +7,14 @@ from flask_jwt import jwt_required
 
 class Item(Resource):
     parser = reqparse.RequestParser()
+    parser.add_argument('item_name',
+                        type=str,
+                        required=True,
+                        help="This field cannot be left blank!"
+                        )
     parser.add_argument('price',
                         type=float,
-                        required=True,
+                        required=False,
                         help="This field cannot be left blank!"
                         )
 
@@ -20,11 +25,13 @@ class Item(Resource):
             return item.json()
         return {'message': 'Item not found'}, 404
 
-    def post(self, item_name):
-        if ItemModel.find_by_name(item_name):
-            return {'message': "An item with name '{}' already exists.".format(item_name)}
+    @jwt_required()
+    def post(self):
         data = Item.parser.parse_args()
-        item = ItemModel(item_name, data['price'], insert_timestamp())
+        if ItemModel.find_by_name(data['item_name']):
+            return {'message': "An item with name '{}' already exists.".format(data['item_name'])}
+        data = Item.parser.parse_args()
+        item = ItemModel(data['item_name'], data['price'], insert_timestamp())
         item.created_timestamp = insert_timestamp()
         try:
             item.save_to_db()
@@ -33,18 +40,19 @@ class Item(Resource):
         return item.json(), 201
 
     @jwt_required()
-    def delete(self, item_name):
-        item = ItemModel.find_by_name(item_name)
+    def delete(self):
+        data = Item.parser.parse_args()
+        item = ItemModel.find_by_name(data['item_name'])
         if item:
             item.delete_from_db()
             return {'message': 'Item deleted'}
 
     @jwt_required()
-    def put(self, item_name):
+    def put(self):
         data = Item.parser.parse_args()
-        item = ItemModel.find_by_name(item_name)
+        item = ItemModel.find_by_name(data['item_name'])
         if item is None:
-            item = ItemModel(item_name, data['price'], insert_timestamp())
+            item = ItemModel(data['item_name'], data['price'], insert_timestamp())
             item.created_timestamp = insert_timestamp()
         else:
             item.price = data['price']
@@ -54,7 +62,6 @@ class Item(Resource):
 
 
 class ItemList(Resource):
-    @jwt_required()
     def get(self):
         return {'items': [item.json() for item in ItemModel.query.all()]}
 
@@ -64,12 +71,12 @@ class ItemToStore(Resource):
     parser.add_argument('store_name',
                         type=str,
                         required=True,
-                        help="Every User needs a NAME"
+                        help="Every Store needs a NAME"
                         )
     parser.add_argument('item_name',
                         type=str,
                         required=False,
-                        help="Every Store needs a NAME"
+                        help="Every Item needs a NAME"
                         )
 
     @jwt_required()
