@@ -1,7 +1,9 @@
 import re
 from sqlalchemy import func
-from typing import Dict
+from typing import Dict, Union
 from db.db import db, convert_timestamp
+
+ItemJSON = Dict[int, Union[str, float, float]]
 
 class ItemModel(db.Model):
     __tablename__ = 'items'
@@ -20,11 +22,13 @@ class ItemModel(db.Model):
         self.price = price
         self.modify_timestamp = modify_timestamp
 
-    def json(self) -> Dict:
-        return {'id': self.id, 'item_name': self.item_name, 'price': self.price,
-                'created_at': convert_timestamp(self.created_timestamp),
-                'last_modified': convert_timestamp(self.modify_timestamp),
-                'store_id': self.store_id, 'user_id': self.user_id}
+    def json(self) -> ItemJSON:
+        return {self.id [{
+            'item_name': self.item_name, 'price': self.price,
+            'created_at': convert_timestamp(self.created_timestamp),
+            'last_modified': convert_timestamp(self.modify_timestamp),
+            'store_id': self.store_id, 'user_id': self.user_id}]
+        }
 
     @classmethod
     def find_by_name(cls, item_name: str) -> "ItemModel":

@@ -1,6 +1,8 @@
 from sqlalchemy import func
-from typing import Dict
+from typing import Dict, Union
 from db.db import db, convert_timestamp
+
+PaymentJSON = Dict[int, Union[int, float, int, float]]
 
 class PaymentModel(db.Model):
     __tablename__ = 'payment'
@@ -19,11 +21,11 @@ class PaymentModel(db.Model):
         self.total_quantity = total_quantity
         self.payment_timestamp = payment_timestamp
 
-    def json(self) -> Dict:
-        return {
+    def json(self) -> PaymentJSON:
+        return {self.id: [{
             'receipt_num': self.receipt, 'user_id': self.user_id,
             'total_quantity': self.total_quantity,
-            'total_value': self.total_value
+            'total_value': self.total_value}]
         }
 
     @classmethod

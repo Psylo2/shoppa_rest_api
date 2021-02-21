@@ -1,5 +1,7 @@
-from typing import Dict
+from typing import Dict, Union
 from db.db import db, convert_timestamp
+
+BlockJSON = Dict[int, Union[int, float]]
 
 class BlockListModel(db.Model):
     __tablename__ = 'blocklist'
@@ -11,9 +13,10 @@ class BlockListModel(db.Model):
         self.user_id = user_id
         self.insert_time = insert_time
 
-    def json(self) -> Dict:
-        return {'id': self.id, 'user_id': self.user_id,
-                'insert_time': convert_timestamp(self.insert_time)}
+    def json(self) -> BlockJSON:
+        return {self.id: [{'user_id': self.user_id,
+                           'insert_time': convert_timestamp(self.insert_time)}]
+                }
 
     def save_to_db(self) -> None:
         db.session.add(self)

@@ -10,7 +10,7 @@ from resources.item import Item, ItemList, ItemToStore
 from resources.store import Store, StoreList
 from resources.payment import Payment, PaymentList
 from resources.blocklist import BlockList, BlockListShow
-
+from db.db import db
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///db/data.db')
 app.config['PROPAGATE_EXCEPTIONS'] = True
@@ -20,8 +20,12 @@ app.config['JWT_EXPIRATION_DELTA'] = timedelta(hours=1)
 
 app.secret_key = os.urandom(16).hex()
 api = Api(app)
-
+db.init_app(app)
 jwt = JWT(app, authenticate, identity)
+@app.before_first_request
+def create_tables():
+    db.create_all()
+
 
 api.add_resource(Store, '/store')
 api.add_resource(StoreList, '/stores')

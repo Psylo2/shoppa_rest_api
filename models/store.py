@@ -1,5 +1,7 @@
-from typing import Dict
+from typing import Dict, Union
 from db.db import db, convert_timestamp
+
+StoreJSON = Dict[int, Union[str, float, float]]
 
 class StoreModel(db.Model):
     __tablename__ = 'stores'
@@ -17,11 +19,12 @@ class StoreModel(db.Model):
         self.modify_timestamp = modify_timestamp
 
 
-    def json(self) -> "Dict":
-        return {'id': self.id, 'name': self.name,
-                'created_at': convert_timestamp(self.created_timestamp),
-                'last_modified': convert_timestamp(self.modify_timestamp),
-                'items': [item.json() for item in self.items.all()]}
+    def json(self) -> StoreJSON:
+        return {self.id: [
+            {'name': self.name, 'created_at': convert_timestamp(self.created_timestamp),
+             'last_modified': convert_timestamp(self.modify_timestamp),
+             'items': [item.json() for item in self.items.all()]}
+        ]}
 
     @classmethod
     def find_by_name(cls, name: str) -> "StoreModel":

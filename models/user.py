@@ -1,5 +1,7 @@
 from db.db import db, convert_timestamp, encrypt
-from typing import Dict
+from typing import Dict, Union
+
+UserJSON = Dict[str, Union[str, str, float]]
 
 class UserModel(db.Model):
     __tablename__ = 'users'
@@ -17,11 +19,13 @@ class UserModel(db.Model):
         self.password = encrypt(password)
         self.last_login_timestamp = last_login_timestamp
 
-    def json(self) -> "Dict":
-        return {'id': self.id, 'username': str(encrypt(self.username)),
-                'email': str(encrypt(self.email)), 'password': str(self.password),
-                'registered_at': convert_timestamp(self.registered_timestamp),
-                'last_login_timestamp ': convert_timestamp(self.last_login_timestamp)}
+    def json(self) -> UserJSON:
+        return {self.id: [
+            {'username': str(encrypt(self.username)), 'email': str(encrypt(self.email)),
+             'password': str(self.password),
+             'registered_at': convert_timestamp(self.registered_timestamp),
+             'last_login_timestamp ': convert_timestamp(self.last_login_timestamp)}
+        ]}
 
     def save_to_db(self) -> None:
         db.session.add(self)
