@@ -22,7 +22,8 @@ class Store(Resource):
     def post(self):
         data = Store.parser.parse_args()
         if StoreModel.find_by_name(data['store_name']):
-            return {'message': "An item with name '{}' already exists.".format(data['store_name'])}, 400
+            return {'message': "An item with name '{}' already exists.".format(
+                data['store_name'])}, 400
         store = StoreModel(data['store_name'], insert_timestamp(), insert_timestamp())
         try:
             store.save_to_db()

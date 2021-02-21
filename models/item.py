@@ -1,7 +1,7 @@
+import re
 from sqlalchemy import func
-
-from db.db import db, convert_timestamp
 from typing import Dict
+from db.db import db, convert_timestamp
 
 class ItemModel(db.Model):
     __tablename__ = 'items'
@@ -40,11 +40,21 @@ class ItemModel(db.Model):
 
     @classmethod
     def update_user_id(cls, _id) -> "ItemModel":
-        return cls.query.filter_by(user_id=_id).update({ItemModel.user_id: None})
+        return cls.query.filter_by(user_id=_id).\
+            update({ItemModel.user_id: None}).all()
 
     @classmethod
     def sum_cart_by_user_id(cls, _id: int) -> "ItemModel":
-        return cls.query.with_entities(func.sum(ItemModel.price)).filter_by(user_id=_id).all()
+        tot = str(cls.query.with_entities(func.sum(ItemModel.price)).
+                  filter_by(user_id=_id).all())
+        fl = float(re.sub('[^0-9.]', '', tot))
+        return round(fl, 2)
+
+    @classmethod
+    def count_cart_by_user_id(cls, _id: int) -> "ItemModel":
+        count = str(cls.query.with_entities(func.count(ItemModel.price)).
+                    filter_by(user_id=_id).all())
+        return int(re.sub('[^0-9]', '', count))
 
     def save_to_db(self) -> None:
         db.session.add(self)

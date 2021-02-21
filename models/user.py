@@ -1,4 +1,5 @@
 from db.db import db, convert_timestamp, encrypt
+from typing import Dict
 
 class UserModel(db.Model):
     __tablename__ = 'users'
@@ -9,14 +10,14 @@ class UserModel(db.Model):
     registered_timestamp = db.Column(db.Float)
     last_login_timestamp = db.Column(db.Float)
 
-
-    def __init__(self, username: str, email: str, password: str, last_login_timestamp: float):
+    def __init__(self, username: str, email: str,
+                 password: str, last_login_timestamp: float):
         self.username = username
         self.email = email
         self.password = encrypt(password)
         self.last_login_timestamp = last_login_timestamp
 
-    def json(self) :
+    def json(self) -> "Dict":
         return {'id': self.id, 'username': str(encrypt(self.username)),
                 'email': str(encrypt(self.email)), 'password': str(self.password),
                 'registered_at': convert_timestamp(self.registered_timestamp),

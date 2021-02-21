@@ -1,13 +1,9 @@
 from flask_restful import Resource, reqparse
-from db.db import insert_timestamp
-
-
 from flask_jwt import jwt_required
-
+from db.db import insert_timestamp
 from models.blocklist import BlockListModel
 from models.item import ItemModel
 from models.user import UserModel
-
 
 class BlockList(Resource):
     parser = reqparse.RequestParser()
@@ -46,7 +42,6 @@ class BlockList(Resource):
             return {'message': 'User not found in block list'}, 404
         block.delete_from_db()
         return {'message': "User- '{}' is now in Deleted from Block List".format(user.username)}
-
 
 class BlockListShow(Resource):
     @jwt_required()

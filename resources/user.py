@@ -3,7 +3,6 @@ from flask_restful import Resource, reqparse
 from models.user import UserModel
 from models.item import ItemModel
 from db.db import insert_timestamp
-from models.blocklist import BlockListModel
 
 class UserRegister(Resource):
     parser = reqparse.RequestParser()
@@ -86,9 +85,12 @@ class UserGetItem(Resource):
         item = ItemModel.find_by_name(data['item_name'])
         if not user or not item:
             return {'message': 'User or Item not found'}, 404
+        if item.store_id is None:
+            return {'message': 'Item is still OUT OF STOCK'}, 401
         item.user_id = user.id
         item.save_to_db()
-        return {'message': "Item- '{}' is now IN '{}'s CART".format(item.item_name, user.username)}
+        return {'message': "Item- '{}' is now IN '{}'s CART".format(
+            item.item_name, user.username)}
 
     @jwt_required()
     def delete(self):
@@ -101,7 +103,8 @@ class UserGetItem(Resource):
             return {'message': 'User or Item not found'}, 404
         item.user_id = None
         item.save_to_db()
-        return {'message': "Item- '{}' is now DELETED '{}'s CART".format(item.item_name, user.username)}
+        return {'message': "Item- '{}' is now DELETED '{}'s CART".format(
+            item.item_name, user.username)}
 
 class UserCart(Resource):
     parser = reqparse.RequestParser()
@@ -111,6 +114,7 @@ class UserCart(Resource):
                         help="Every User needs a USERNAME / EMAIL"
                         )
 
+    @jwt_required()
     def post(self):
         data = UserCart.parser.parse_args()
         user = UserModel.find_by_username(data['username_email'])
@@ -120,6 +124,7 @@ class UserCart(Resource):
             return {'message': 'User not found'}, 404
         return {'items': [item.json() for item in ItemModel.find_cart(user.id)]}
 
+    @jwt_required()
     def get(self):
         data = UserCart.parser.parse_args()
         user = UserModel.find_by_username(data['username_email'])
@@ -129,6 +134,8 @@ class UserCart(Resource):
             return {'message': 'User not found'}, 404
         return {
             'user_id': user.id,
+            'items': [item.json() for item in ItemModel.find_cart(user.id)],
+            'total_quantity': ItemModel.count_cart_by_user_id(user.id),
             'total_value': ItemModel.sum_cart_by_user_id(user.id)
         }
 

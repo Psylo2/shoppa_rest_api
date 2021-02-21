@@ -1,13 +1,12 @@
 from flask_restful import Resource, reqparse
+from flask_jwt import jwt_required
 from db.db import insert_timestamp
 from models.item import ItemModel
 from models.store import StoreModel
-from flask_jwt import jwt_required
-
 
 class Item(Resource):
     parser = reqparse.RequestParser()
-    parser.add_argument('item_name',
+    parser.add_argument('user_id',
                         type=str,
                         required=True,
                         help="This field cannot be left blank!"
