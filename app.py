@@ -10,14 +10,14 @@ from resources.item import Item, ItemList, ItemToStore
 from resources.store import Store, StoreList
 from resources.payment import Payment, PaymentList
 from resources.blocklist import BlockList, BlockListShow
-from db.db import db
 
 app = Flask(__name__)
-
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///db/data.db')
 app.config['PROPAGATE_EXCEPTIONS'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JWT_AUTH_URL_RULE'] = '/login'
 app.config['JWT_EXPIRATION_DELTA'] = timedelta(hours=1)
+
 app.secret_key = os.urandom(16).hex()
 api = Api(app)
 
