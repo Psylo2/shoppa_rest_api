@@ -17,7 +17,7 @@ def convert_timestamp(timestamp):
     return str(utc_date.astimezone(pytz.timezone(get_localzone().zone)))
 
 def encrypt(content):
-    return bcrypt.hashpw(content.encode("UTF-8"), bcrypt.gensalt())
+    return bcrypt.hashpw(content.encode("UTF-8"), bcrypt.gensalt(14))
 
 def decrypt(x, y):
     return bcrypt.checkpw(x.encode("UTF-8"), y)

@@ -155,7 +155,6 @@ class UserLogin(Resource):
         user = auth_by_username(data['username_email'], data['password'])
         if user is None:
             return {"message": "No such User active"}, 401
-
         access_token = create_access_token(identity=user.id, fresh=True)
         refresh_token = create_refresh_token(user.id)
         return {"access_token": access_token, "refresh_token": refresh_token}, 200
