@@ -1,5 +1,4 @@
 import os
-from db.db import db
 from flask import Flask
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
@@ -28,11 +27,6 @@ app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = [
 app.config['JWT_SECRET_KEY'] = os.urandom(16).hex()
 app.secret_key = os.urandom(16).hex()
 api = Api(app)
-db.init_app(app)
-
-@app.before_first_request
-def create_tables():
-    db.create_all()
 
 jwt = JWTManager(app)
 
