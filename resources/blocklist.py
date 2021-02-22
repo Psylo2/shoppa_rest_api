@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse
-from flask_jwt import jwt_required
+from flask_jwt_extended import jwt_required
 from db.db import insert_timestamp
 from models.blocklist import BlockListModel
 from models.item import ItemModel
@@ -13,8 +13,9 @@ class BlockList(Resource):
                         help="Every User needs a USERNAME / EMAIL"
                         )
 
-    @jwt_required()
-    def post(self):
+    @classmethod
+    @jwt_required
+    def post(cls):
         data = BlockList.parser.parse_args()
         user = UserModel.find_by_username(data['username_email'])
         if not user:
@@ -29,8 +30,9 @@ class BlockList(Resource):
         block.save_to_db()
         return {'message': "User- '{}' is now in Block List".format(user.username)}
 
-    @jwt_required()
-    def delete(self):
+    @classmethod
+    @jwt_required
+    def delete(cls):
         data = BlockList.parser.parse_args()
         user = UserModel.find_by_username(data['username_email'])
         if not user:
@@ -44,6 +46,7 @@ class BlockList(Resource):
         return {'message': "User- '{}' is now in Deleted from Block List".format(user.username)}
 
 class BlockListShow(Resource):
-    @jwt_required()
-    def get(self):
+    @classmethod
+    @jwt_required
+    def get(cls):
         return {'users': [user.json() for user in BlockListModel.query.all()]}

@@ -1,7 +1,8 @@
+from typing import Dict, Union, List
 from db.db import db, convert_timestamp, encrypt
-from typing import Dict, Union
+from models.item import ItemJSON, ItemModel
 
-UserJSON = Dict[str, Union[str, str, float]]
+UserJSON = Dict[str, Union[str, str, float, List[ItemJSON]]]
 
 class UserModel(db.Model):
     __tablename__ = 'users'
@@ -22,9 +23,8 @@ class UserModel(db.Model):
     def json(self) -> UserJSON:
         return {self.id: [
             {'username': str(encrypt(self.username)), 'email': str(encrypt(self.email)),
-             'password': str(self.password),
-             'registered_at': convert_timestamp(self.registered_timestamp),
-             'last_login_timestamp ': convert_timestamp(self.last_login_timestamp)}
+             'last_login_timestamp ': convert_timestamp(self.last_login_timestamp),
+             'items': [item.json() for item in ItemModel.find_cart(self.id)]}
         ]}
 
     def save_to_db(self) -> None:

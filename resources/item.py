@@ -1,12 +1,13 @@
 from flask_restful import Resource, reqparse
-from flask_jwt import jwt_required
+from flask_jwt_extended import jwt_required, fresh_jwt_required
 from db.db import insert_timestamp
 from models.item import ItemModel
 from models.store import StoreModel
 
+
 class Item(Resource):
     parser = reqparse.RequestParser()
-    parser.add_argument('user_id',
+    parser.add_argument('item_name',
                         type=str,
                         required=True,
                         help="This field cannot be left blank!"
@@ -17,15 +18,17 @@ class Item(Resource):
                         help="This field cannot be left blank!"
                         )
 
-    @jwt_required()
-    def get(self, item_name):
+    @classmethod
+    @jwt_required
+    def get(cls, item_name):
         item = ItemModel.find_by_name(item_name)
         if item:
             return item.json()
         return {'message': 'Item not found'}, 404
 
-    @jwt_required()
-    def post(self):
+    @classmethod
+    @fresh_jwt_required
+    def post(cls):
         data = Item.parser.parse_args()
         if ItemModel.find_by_name(data['item_name']):
             return {'message': "An item with name '{}' already exists.".format(data['item_name'])}
@@ -38,8 +41,9 @@ class Item(Resource):
             return {"message": "An error occurred inserting the Item."}, 500
         return item.json(), 201
 
-    @jwt_required()
-    def delete(self):
+    @classmethod
+    @jwt_required
+    def delete(cls):
         data = Item.parser.parse_args()
         item = ItemModel.find_by_name(data['item_name'])
         if item and (item.user_id is None):
@@ -47,8 +51,9 @@ class Item(Resource):
             return {'message': 'Item deleted'}
         return {"message": "Item is either taken by user or not found."}, 401
 
-    @jwt_required()
-    def put(self):
+    @classmethod
+    @jwt_required
+    def put(cls):
         data = Item.parser.parse_args()
         item = ItemModel.find_by_name(data['item_name'])
         if item is None:
@@ -62,7 +67,8 @@ class Item(Resource):
 
 
 class ItemList(Resource):
-    def get(self):
+    @classmethod
+    def get(cls):
         return {'items': [item.json() for item in ItemModel.query.all()]}
 
 
@@ -79,8 +85,9 @@ class ItemToStore(Resource):
                         help="Every Item needs a NAME"
                         )
 
-    @jwt_required()
-    def post(self):
+    @classmethod
+    @jwt_required
+    def post(cls):
         data = ItemToStore.parser.parse_args()
         store = StoreModel.find_by_name(data['store_name'])
         item = ItemModel.find_by_name(data['item_name'])
@@ -90,8 +97,10 @@ class ItemToStore(Resource):
         item.save_to_db()
         return {'message': "Item '{}' is now IN STOCK at store '{}'".format(item.item_name,
                                                                             store.name)}
-    @jwt_required()
-    def delete(self):
+
+    @classmethod
+    @jwt_required
+    def delete(cls):
         data = ItemToStore.parser.parse_args()
         store = StoreModel.find_by_name(data['store_name'])
         item = ItemModel.find_by_name(data['item_name'])

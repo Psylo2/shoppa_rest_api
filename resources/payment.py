@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse
-from flask_jwt import jwt_required
+from flask_jwt_extended import jwt_required
 from db.db import insert_timestamp
 from models.payment import PaymentModel
 from models.item import ItemModel
@@ -13,8 +13,9 @@ class Payment(Resource):
                         help="This field cannot be left blank!"
                         )
 
-    @jwt_required()
-    def post(self):
+    @classmethod
+    @jwt_required
+    def post(cls):
         data = Payment.parser.parse_args()
         user = UserModel.find_by_username(data['user_id'])
         if not user:
@@ -35,8 +36,9 @@ class Payment(Resource):
                 'message': 'No Items in Cart!'
                   }, 401
 
-    @jwt_required()
-    def get(self):
+    @classmethod
+    @jwt_required
+    def get(cls):
         data = Payment.parser.parse_args()
         user = UserModel.find_by_username(data['user_id'])
         if not user:
@@ -51,6 +53,7 @@ class Payment(Resource):
         }
 
 class PaymentList(Resource):
-    @jwt_required()
-    def get(self):
+    @classmethod
+    @jwt_required
+    def get(cls):
         return {'users': [payment.json() for payment in PaymentModel.query.all()]}

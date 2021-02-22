@@ -1,5 +1,11 @@
-from flask_jwt import jwt_required
+from flask import jsonify
+from flask_jwt_extended import jwt_required, get_raw_jwt, get_jwt_identity, create_access_token, \
+    jwt_refresh_token_required, create_refresh_token, set_access_cookies, set_refresh_cookies
 from flask_restful import Resource, reqparse
+
+from blacklist import BLACKLIST
+from models.blocklist import BlockListModel
+from security import auth_by_username
 from models.user import UserModel
 from models.item import ItemModel
 from db.db import insert_timestamp
@@ -18,8 +24,8 @@ class UserRegister(Resource):
                         type=str,
                         required=False,
                         help="this field cannot be blank.")
-
-    def post(self):
+    @classmethod
+    def post(cls):
         data = UserRegister.parser.parse_args()
         if UserModel.find_by_username(data['username']):
             return {"message": "Username already Taken!"}, 400
@@ -32,12 +38,13 @@ class UserRegister(Resource):
         return {'message': "User created!"}, 201
 
 class UserList(Resource):
-    @jwt_required()
-    def get(self):
+    @classmethod
+    def get(cls):
         return {'users': [user.json() for user in UserModel.query.all()]}
 
 class User(Resource):
     @classmethod
+    @jwt_required
     def get(cls, user_id: int):
         user = UserModel.find_by_id(user_id)
         if not user:
@@ -45,6 +52,7 @@ class User(Resource):
         return user.json()
 
     @classmethod
+    @jwt_required
     def delete(cls, user_id: int):
         user = UserModel.find_by_id(user_id)
         if not user:
@@ -66,8 +74,9 @@ class UserGetItem(Resource):
                         help="Every Store needs a NAME"
                         )
 
-    @jwt_required()
-    def get(self):
+    @classmethod
+    @jwt_required
+    def get(cls):
         data = UserGetItem.parser.parse_args()
         user = UserModel.find_by_username(data['username_email'])
         if not user:
@@ -76,12 +85,13 @@ class UserGetItem(Resource):
                 return {'message': 'User or Item not found'}, 404
         return user.json_item()
 
-    @jwt_required()
-    def post(self):
+    @classmethod
+    @jwt_required
+    def post(cls):
         data = UserGetItem.parser.parse_args()
         user = UserModel.find_by_username(data['username_email'])
         if not user:
-            user = User.find_by_email(data['username_email'])
+            user = UserModel.find_by_email(data['username_email'])
         item = ItemModel.find_by_name(data['item_name'])
         if not user or not item:
             return {'message': 'User or Item not found'}, 404
@@ -92,8 +102,9 @@ class UserGetItem(Resource):
         return {'message': "Item- '{}' is now IN '{}'s CART".format(
             item.item_name, user.username)}
 
-    @jwt_required()
-    def delete(self):
+    @classmethod
+    @jwt_required
+    def delete(cls):
         data = UserGetItem.parser.parse_args()
         user = UserModel.find_by_username(data['username_email'])
         if not user:
@@ -114,28 +125,59 @@ class UserCart(Resource):
                         help="Every User needs a USERNAME / EMAIL"
                         )
 
-    @jwt_required()
-    def post(self):
+    @classmethod
+    @jwt_required
+    def get(cls):
         data = UserCart.parser.parse_args()
         user = UserModel.find_by_username(data['username_email'])
         if not user:
             user = UserModel.find_by_email(data['username_email'])
         if not user:
             return {'message': 'User not found'}, 404
-        return {'items': [item.json() for item in ItemModel.find_cart(user.id)]}
-
-    @jwt_required()
-    def get(self):
-        data = UserCart.parser.parse_args()
-        user = UserModel.find_by_username(data['username_email'])
-        if not user:
-            user = UserModel.find_by_email(data['username_email'])
-        if not user:
-            return {'message': 'User not found'}, 404
-        return {
-            'user_id': user.id,
+        return {user.id: [{
             'items': [item.json() for item in ItemModel.find_cart(user.id)],
             'total_quantity': ItemModel.count_cart_by_user_id(user.id),
             'total_value': ItemModel.sum_cart_by_user_id(user.id)
-        }
+        }]}
+
+
+class UserLogin(Resource):
+    parser = reqparse.RequestParser()
+    parser.add_argument('username_email',
+                        type=str,
+                        required=True,
+                        help="Every User needs a USERNAME / EMAIL"
+                        )
+    parser.add_argument('password',
+                        type=str,
+                        required=True,
+                        help="Every User needs a USERNAME / EMAIL"
+                        )
+
+    @classmethod
+    def post(cls):
+        data = UserLogin.parser.parse_args()
+        user = auth_by_username(data['username_email'], data['password'])
+        access_token = create_access_token(identity=user.id, fresh=True)
+        refresh_token = create_refresh_token(user.id)
+        # access_cookies = set_access_cookies(access_token)
+        # refresh_cookies = set_refresh_cookies(refresh_token)
+        return {"access_token": access_token, "refresh_token": refresh_token}, 200
+
+class UserLogout(Resource):
+    @classmethod
+    @jwt_required
+    def post(cls):
+        jti = get_raw_jwt()["jti"]
+        user_id = get_jwt_identity()
+        BLACKLIST.add(jti)
+        return "User id: {} successfully logged out.".format(user_id)
+
+class TokenRefresh(Resource):
+    @classmethod
+    @jwt_refresh_token_required
+    def post(cls):
+        current_user = get_jwt_identity()
+        new_token = create_access_token(current_user, fresh=False)
+        return {'access_token': new_token}, 200
 

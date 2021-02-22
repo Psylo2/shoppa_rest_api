@@ -1,9 +1,10 @@
-import re
 from sqlalchemy import func
 from typing import Dict, Union
 from db.db import db, convert_timestamp
+from models.store import StoreModel
 
-ItemJSON = Dict[int, Union[str, float, float]]
+ItemJSON = Dict[int, Union[str, float, float, str]]
+
 
 class ItemModel(db.Model):
     __tablename__ = 'items'
@@ -23,11 +24,10 @@ class ItemModel(db.Model):
         self.modify_timestamp = modify_timestamp
 
     def json(self) -> ItemJSON:
-        return {self.id [{
+        return {self.id: [{
             'item_name': self.item_name, 'price': self.price,
-            'created_at': convert_timestamp(self.created_timestamp),
             'last_modified': convert_timestamp(self.modify_timestamp),
-            'store_id': self.store_id, 'user_id': self.user_id}]
+            'store_id': self.store_id}]
         }
 
     @classmethod
@@ -43,22 +43,27 @@ class ItemModel(db.Model):
         return cls.query.filter_by(user_id=_id).all()
 
     @classmethod
-    def update_user_id(cls, _id) -> "ItemModel":
-        return cls.query.filter_by(user_id=_id).\
-            update({ItemModel.user_id: None}).all()
+    def update_user_id(cls, _id: int) -> "ItemModel":
+        return cls.query.filter_by(user_id=_id).update(dict(user_id=None))
+
+        return item.all()
 
     @classmethod
     def sum_cart_by_user_id(cls, _id: int) -> "ItemModel":
-        tot = str(cls.query.with_entities(func.sum(ItemModel.price)).
-                  filter_by(user_id=_id).all())
-        fl = float(re.sub('[^0-9.]', '', tot))
-        return round(fl, 2)
+        tot = cls.query.with_entities(func.sum(ItemModel.price)). \
+            filter_by(user_id=_id).all()
+        print(tot[0][0])
+        if tot[0][0] is None:
+            return 0
+        return tot[0][0]
 
     @classmethod
     def count_cart_by_user_id(cls, _id: int) -> "ItemModel":
-        count = str(cls.query.with_entities(func.count(ItemModel.price)).
-                    filter_by(user_id=_id).all())
-        return int(re.sub('[^0-9]', '', count))
+        tot = cls.query.with_entities(func.count(ItemModel.price)). \
+            filter_by(user_id=_id).all()
+        if tot[0][0] is None:
+            return 0
+        return tot[0][0]
 
     def save_to_db(self) -> None:
         db.session.add(self)
@@ -67,7 +72,3 @@ class ItemModel(db.Model):
     def delete_from_db(self) -> None:
         db.session.delete(self)
         db.session.commit()
-
-
-
-
