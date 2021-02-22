@@ -10,6 +10,7 @@ class Store(Resource):
                         required=True,
                         help="Every Store needs a NAME"
                         )
+
     @classmethod
     @jwt_required
     def get(cls, name):

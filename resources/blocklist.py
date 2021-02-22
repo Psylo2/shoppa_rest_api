@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, fresh_jwt_required
 from db.db import insert_timestamp
 from models.blocklist import BlockListModel
 from models.item import ItemModel
@@ -47,6 +47,6 @@ class BlockList(Resource):
 
 class BlockListShow(Resource):
     @classmethod
-    @jwt_required
+    @fresh_jwt_required
     def get(cls):
         return {'users': [user.json() for user in BlockListModel.query.all()]}
