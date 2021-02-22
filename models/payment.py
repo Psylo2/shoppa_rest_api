@@ -2,10 +2,8 @@ from sqlalchemy import func
 from typing import Dict, Union
 from db.db import db, convert_timestamp
 from models.item import ItemModel
-from models.user import UserModel
 
 PaymentJSON = Dict[int, Union[int, float, int, float]]
-
 
 class PaymentModel(db.Model):
     __tablename__ = 'payment'
@@ -35,9 +33,6 @@ class PaymentModel(db.Model):
 
     @classmethod
     def find_by_user_id(cls, _id: int) -> "PaymentModel":
-        # return cls.query.with_entities(
-        # func.sum(PaymentModel.payment_timestamp)
-        # ).filter_by(user_id=_id).first()
         return cls.query.with_entities(
             func.sum(convert_timestamp(PaymentModel.payment_timestamp))
         ).filter_by(user_id=_id).first()

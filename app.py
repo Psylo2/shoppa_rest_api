@@ -9,7 +9,7 @@ from resources.user import (User, UserRegister,
                             UserList, UserGetItem, UserCart,
                             UserLogin, TokenRefresh,
                             UserLogout)
-from resources.item import Item, ItemList, ItemToStore
+from resources.item import Item, ItemAllList, ItemToStore, ItemStockList
 from resources.store import Store, StoreList
 from resources.payment import Payment, PaymentList
 from resources.blocklist import BlockList, BlockListShow
@@ -20,10 +20,7 @@ app.config['PROPAGATE_EXCEPTIONS'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=10)
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(minutes=1)
-# app.config['JWT_TOKEN_LOCATION'] = 'cookies'
-# app.config['JWT_COOKIE_CSRF_PROTECT'] = False
-# app.config['SESSION_COOKIE_SECURE '] = True
-app.config['JWT_BLACKLIST_ENABLED'] = True  # enable blacklist feature
+app.config['JWT_BLACKLIST_ENABLED'] = True
 app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = [
     "access",
     "refresh",
@@ -43,11 +40,18 @@ jwt = JWTManager(app)
 def check_if_token_in_blacklist(decrypted_token):
     return decrypted_token["jti"] in BLACKLIST
 
+@jwt.user_claims_loader
+def add_claims_to_jwt(identity):
+    if identity == 1 or identity == 2:
+        return {'is_admin': True}
+    return {'is_admin': False}
+
 
 api.add_resource(Store, '/store')
 api.add_resource(StoreList, '/stores')
 api.add_resource(Item, '/item')
-api.add_resource(ItemList, '/items')
+api.add_resource(ItemAllList, '/items')
+api.add_resource(ItemStockList, '/items_stock')
 api.add_resource(ItemToStore, '/item_to_store')
 
 api.add_resource(User, '/user/<int:user_id>')

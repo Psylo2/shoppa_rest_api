@@ -1,8 +1,7 @@
 from flask_jwt_extended import (jwt_required, get_raw_jwt,
                                 get_jwt_identity, create_access_token,
                                 jwt_refresh_token_required,
-                                create_refresh_token, set_access_cookies,
-                                set_refresh_cookies, fresh_jwt_required)
+                                create_refresh_token, get_jwt_claims)
 from flask_restful import Resource, reqparse
 from blacklist import BLACKLIST
 from models.blocklist import BlockListModel
@@ -44,6 +43,9 @@ class UserList(Resource):
     @classmethod
     @jwt_required
     def get(cls):
+        claims = get_jwt_claims()
+        if not claims['is_admin']:
+            return {'message': 'Admin privilege required.'}, 401
         return {'users': [user.json() for user in UserModel.query.all()]}
 
 
@@ -57,8 +59,12 @@ class User(Resource):
         return user.json()
 
     @classmethod
-    @fresh_jwt_required
+    @jwt_required
     def delete(cls, user_id: int):
+        claims = get_jwt_claims()
+        if not claims['is_admin']:
+            return {'message': 'Admin privilege required.'}, 401
+
         block = BlockListModel.find_by_user_id(user_id=user_id)
         if block:
             return {'message': 'User Already in Block List'}, 404
@@ -149,10 +155,9 @@ class UserLogin(Resource):
         user = auth_by_username(data['username_email'], data['password'])
         if user is None:
             return {"message": "No such User active"}, 401
+
         access_token = create_access_token(identity=user.id, fresh=True)
         refresh_token = create_refresh_token(user.id)
-        # access_cookies = set_access_cookies(access_token)
-        # refresh_cookies = set_refresh_cookies(refresh_token)
         return {"access_token": access_token, "refresh_token": refresh_token}, 200
 
 
@@ -168,7 +173,7 @@ class UserLogout(Resource):
 class TokenRefresh(Resource):
     @classmethod
     @jwt_refresh_token_required
-    def post(cls):
+    def get(cls):
         current_user = get_jwt_identity()
         new_token = create_access_token(current_user, fresh=False)
         return {'access_token': new_token}, 200

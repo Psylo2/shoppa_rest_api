@@ -43,6 +43,10 @@ class ItemModel(db.Model):
         return cls.query.filter_by(user_id=_id).all()
 
     @classmethod
+    def find_stock(cls) -> "ItemModel":
+        return cls.query.filter(cls.store_id != None).all()
+
+    @classmethod
     def update_user_id(cls, _id: int) -> "ItemModel":
         return cls.query.filter_by(user_id=_id).update(dict(user_id=None))
 

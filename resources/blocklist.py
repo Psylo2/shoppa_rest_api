@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse
-from flask_jwt_extended import jwt_required, fresh_jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_claims
 from db.db import insert_timestamp
 from models.blocklist import BlockListModel
 from models.item import ItemModel
@@ -16,6 +16,9 @@ class BlockList(Resource):
     @classmethod
     @jwt_required
     def post(cls):
+        claims = get_jwt_claims()
+        if not claims['is_admin']:
+            return {'message': 'Admin privilege required.'}, 401
         data = BlockList.parser.parse_args()
         user = UserModel.find_by_username(data['username_email'])
         if not user:
@@ -33,6 +36,9 @@ class BlockList(Resource):
     @classmethod
     @jwt_required
     def delete(cls):
+        claims = get_jwt_claims()
+        if not claims['is_admin']:
+            return {'message': 'Admin privilege required.'}, 401
         data = BlockList.parser.parse_args()
         user = UserModel.find_by_username(data['username_email'])
         if not user:
@@ -47,6 +53,9 @@ class BlockList(Resource):
 
 class BlockListShow(Resource):
     @classmethod
-    @fresh_jwt_required
+    @jwt_required
     def get(cls):
+        claims = get_jwt_claims()
+        if not claims['is_admin']:
+            return {'message': 'Admin privilege required.'}, 401
         return {'users': [user.json() for user in BlockListModel.query.all()]}
