@@ -8,3 +8,4 @@ datetime~=4.3
 tzlocal~=2.1
 uwsgi
 psycopg2
+PyJWT~=1.7.1
