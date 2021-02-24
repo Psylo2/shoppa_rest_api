@@ -1,6 +1,5 @@
 import os
 from flask import Flask
-from db.db import db
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from datetime import timedelta
@@ -8,7 +7,7 @@ from blacklist import BLACKLIST
 from resources.user import (User, UserRegister,
                             UserList, UserGetItem, UserCart,
                             UserLogin, TokenRefresh,
-                            UserLogout)
+                            UserLogout, UserConf)
 from resources.item import Item, ItemAllList, ItemToStore, ItemStockList
 from resources.store import Store, StoreList
 from resources.payment import Payment, PaymentList
@@ -18,7 +17,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///db/data.db')
 app.config['PROPAGATE_EXCEPTIONS'] = True
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=10)
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=15)
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(minutes=1)
 app.config['JWT_BLACKLIST_ENABLED'] = True
 app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = [
@@ -28,12 +27,6 @@ app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = [
 app.config['JWT_SECRET_KEY'] = os.urandom(16).hex()
 app.secret_key = os.urandom(16).hex()
 api = Api(app)
-
-db.init_app(app)
-
-@app.before_first_request
-def create_tables():
-    db.create_all()
 
 jwt = JWTManager(app)
 
@@ -62,6 +55,7 @@ api.add_resource(UserList, '/users')
 api.add_resource(UserCart, '/cart')
 api.add_resource(UserLogin, "/login")
 api.add_resource(UserLogout, "/logout")
+api.add_resource(UserConf, "/user_confirm/<int:user_id>")
 api.add_resource(TokenRefresh, "/refresh")
 
 api.add_resource(Payment, '/payment')
@@ -71,5 +65,7 @@ api.add_resource(BlockList, '/block_user')
 api.add_resource(BlockListShow, '/blocklist')
 
 if __name__ == '__main__':
+    from db.db import db
     db.init_app(app)
+
     app.run(port=5000, debug=True)

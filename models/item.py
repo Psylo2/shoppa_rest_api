@@ -1,14 +1,12 @@
 from sqlalchemy import func
 from typing import Dict, Union
 from db.db import db, convert_timestamp
-from models.store import StoreModel
 
-ItemJSON = Dict[int, Union[str, float, float, str]]
-
+ItemJSON = Dict[int, Union[str, float, int, float]]
+ALLItemJSON = Dict[int, Union[str, float, int, int, str]]
 
 class ItemModel(db.Model):
     __tablename__ = 'items'
-
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     item_name = db.Column(db.String(20))
     price = db.Column(db.Float(precision=2))
@@ -26,8 +24,15 @@ class ItemModel(db.Model):
     def json(self) -> ItemJSON:
         return {self.id: [{
             'item_name': self.item_name, 'price': self.price,
-            'last_modified': convert_timestamp(self.modify_timestamp),
-            'store_id': self.store_id}]
+            'store': self.store_id,
+            'last_modified': convert_timestamp(self.modify_timestamp)}]
+        }
+
+    def all_items_json(self) -> ALLItemJSON:
+        return {self.id: [{
+            'item_name': self.item_name, 'price': self.price,
+            'store': self.store_id, 'hold_by_user': self.user_id,
+            'last_modified': convert_timestamp(self.modify_timestamp)}]
         }
 
     @classmethod
@@ -44,7 +49,7 @@ class ItemModel(db.Model):
 
     @classmethod
     def find_stock(cls) -> "ItemModel":
-        return cls.query.filter(cls.store_id != None).all()
+        return cls.query.filter(cls.store_id != None, cls.user_id == None).all()
 
     @classmethod
     def update_user_id(cls, _id: int) -> "ItemModel":

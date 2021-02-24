@@ -3,34 +3,26 @@ from flask_jwt_extended import get_jwt_identity, fresh_jwt_required
 from db.db import insert_timestamp
 from models.payment import PaymentModel
 from models.item import ItemModel
-from models.user import UserModel
-
 
 class Payment(Resource):
     @classmethod
     @fresh_jwt_required
     def post(cls):
         user_id = get_jwt_identity()
-        user = UserModel.find_by_id(user_id)
-        if not user:
-            return {'message': 'User or Item not found'}, 404
         value = ItemModel.sum_cart_by_user_id(user_id)
         if value and value != 0:
             quantity = ItemModel.count_cart_by_user_id(user_id)
             payment = PaymentModel(user_id, value, quantity, insert_timestamp())
             payment.save_to_db()
             ItemModel.update_user_id(user_id)
-            return { 'message': 'Payment ACCEPTED'}, 200
+            return {"message": "Payment ACCEPTED"}, 200
         else:
-            return {'message': 'No Items in Cart!'}, 401
+            return {"message": "No Items in Cart!"}, 401
 
     @classmethod
     @fresh_jwt_required
     def get(cls):
         user_id = get_jwt_identity()
-        user = UserModel.find_by_id(user_id)
-        if not user:
-            return {'message': 'User not found'}, 404
         return {
             'user_id': user_id,
             'items': [item.json() for item in ItemModel.find_cart(user_id)],
@@ -42,4 +34,4 @@ class PaymentList(Resource):
     @classmethod
     @fresh_jwt_required
     def get(cls):
-        return {'users': [payment.json() for payment in PaymentModel.query.all()]}
+        return {'all_payments': [payment.json() for payment in PaymentModel.query.all()]}

@@ -1,13 +1,12 @@
 from sqlalchemy import func
-from typing import Dict, Union
+from typing import Dict, Union, List
 from db.db import db, convert_timestamp
-from models.item import ItemModel
+from models.item import ItemModel, ItemJSON
 
-PaymentJSON = Dict[int, Union[int, float, int, float]]
+PaymentJSON = Dict[int, Union[int, int, int, float, List[ItemJSON]]]
 
 class PaymentModel(db.Model):
     __tablename__ = 'payment'
-
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.String(20))
     total_value = db.Column(db.Float(precision=2))

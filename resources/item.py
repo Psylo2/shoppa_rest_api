@@ -23,14 +23,14 @@ class Item(Resource):
         item = ItemModel.find_by_name(item_name)
         if item:
             return item.json()
-        return {'message': 'Item not found'}, 404
+        return {"message": "Item not found"}, 404
 
     @classmethod
     @fresh_jwt_required
     def post(cls):
         data = Item.parser.parse_args()
         if ItemModel.find_by_name(data['item_name']):
-            return {'message': "An item with name '{}' already exists.".format(data['item_name'])}
+            return {'message': "item {} already exists.".format(data['item_name'])}
         data = Item.parser.parse_args()
         item = ItemModel(data['item_name'], data['price'], insert_timestamp())
         item.created_timestamp = insert_timestamp()
@@ -45,13 +45,13 @@ class Item(Resource):
     def delete(cls):
         claims = get_jwt_claims()
         if not claims['is_admin']:
-            return {'message': 'Admin privilege required.'}, 401
+            return {"message": "Admin privilege required."}, 401
 
         data = Item.parser.parse_args()
         item = ItemModel.find_by_name(data['item_name'])
         if item and (item.user_id is None):
             item.delete_from_db()
-            return {'message': 'Item deleted'}
+            return {"message": "Item deleted"}
         return {"message": "Item is either taken by user or not found."}, 401
 
     @classmethod
@@ -78,15 +78,14 @@ class ItemAllList(Resource):
     def get(cls):
         claims = get_jwt_claims()
         if not claims['is_admin']:
-            return {'message': 'Admin privilege required.'}, 401
-        return {'items': [item.json() for item in ItemModel.query.all()]}
+            return {"message": "Admin privilege required."}, 401
+        return {'all_items': [item.all_items_json() for item in ItemModel.query.all()]}
 
 class ItemStockList(Resource):
     @classmethod
     @jwt_required
     def get(cls):
-        return {'items': [item.json() for item in ItemModel.find_stock()]}
-
+        return {'in_stock': [item.json() for item in ItemModel.find_stock()]}
 
 
 class ItemToStore(Resource):
@@ -115,8 +114,7 @@ class ItemToStore(Resource):
             return {'message': 'Store or Item not found'}, 404
         item.store_id = store.id
         item.save_to_db()
-        return {'message': "Item '{}' is now IN STOCK at store '{}'".format(item.item_name,
-                                                                            store.name)}
+        return {'message': "Item: {} is now IN STOCK".format(item.item_name,)}
 
     @classmethod
     @jwt_required
@@ -131,5 +129,4 @@ class ItemToStore(Resource):
             return {'message': 'Store not found'}, 404
         item.store_id = None
         item.save_to_db()
-        return {'message': "Item '{}' is now OUT OF STOCK at store '{}'".format(item.item_name,
-                                                                                store.name)}
+        return {'message': "Item: {} is now OUT OF STOCK".format(item.item_name,)}

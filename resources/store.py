@@ -24,17 +24,17 @@ class Store(Resource):
     def post(cls):
         claims = get_jwt_claims()
         if not claims['is_admin']:
-            return {'message': 'Admin privilege required.'}, 401
+            return {"message": "Admin privilege required."}, 401
 
         data = Store.parser.parse_args()
         if StoreModel.find_by_name(data['store_name']):
-            return {'message': "An Store with name '{}' already exists.".format(
+            return {"message": "Store {} already exists.".format(
                 data['store_name'])}, 400
         store = StoreModel(data['store_name'], insert_timestamp(), insert_timestamp())
         try:
             store.save_to_db()
         except:
-            return {'message': 'An error occurred while creating the store.'}, 500
+            return {"message": "An error occurred while creating the store."}, 500
         return store.json(), 201
 
     @classmethod
@@ -42,13 +42,13 @@ class Store(Resource):
     def delete(cls):
         claims = get_jwt_claims()
         if not claims['is_admin']:
-            return {'message': 'Admin privilege required.'}, 401
+            return {"message": "Admin privilege required."}, 401
 
         data = Store.parser.parse_args()
         store = StoreModel.find_by_name(data['store_name'])
         if store:
             store.delete_from_db()
-        return {'message': 'Store deleted.'}
+        return {"message": "Store deleted."}
 
 
 class StoreList(Resource):
@@ -57,6 +57,6 @@ class StoreList(Resource):
     def get(cls):
         claims = get_jwt_claims()
         if not claims['is_admin']:
-            return {'message': 'Admin privilege required.'}, 401
+            return {"message": "Admin privilege required."}, 401
 
-        return {'stores': [store.json() for store in StoreModel.query.all()]}
+        return {'all_stores': [store.json() for store in StoreModel.query.all()]}

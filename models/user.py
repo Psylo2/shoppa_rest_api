@@ -12,6 +12,7 @@ class UserModel(db.Model):
     email = db.Column(db.String(25), unique=True)
     registered_timestamp = db.Column(db.Float)
     last_login_timestamp = db.Column(db.Float)
+    activated = db.Column(db.Boolean, default=False)
 
     def __init__(self, username: str, email: str,
                  password: str, last_login_timestamp: float):
@@ -46,5 +47,3 @@ class UserModel(db.Model):
     @classmethod
     def find_by_id(cls, _id: int) -> "UserModel":
         return cls.query.filter_by(id=_id).first()
-
-

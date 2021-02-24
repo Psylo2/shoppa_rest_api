@@ -38,18 +38,18 @@ class BlockList(Resource):
     def delete(cls):
         claims = get_jwt_claims()
         if not claims['is_admin']:
-            return {'message': 'Admin privilege required.'}, 401
+            return {"message": "Admin privilege required."}, 401
         data = BlockList.parser.parse_args()
         user = UserModel.find_by_username(data['username_email'])
         if not user:
             user = UserModel.find_by_email(data['username_email'])
         if not user:
-            return {'message': 'User not found'}, 404
+            return {"message": "User not found"}, 404
         block = BlockListModel.find_by_user_id(user_id=user.id)
         if not block:
-            return {'message': 'User not found in block list'}, 404
+            return {"message": "User not found in block list"}, 404
         block.delete_from_db()
-        return {'message': "User- '{}' is now in Deleted from Block List".format(user.username)}
+        return {'message': "User: {} is Deleted from Block List".format(user.username,)}
 
 class BlockListShow(Resource):
     @classmethod
@@ -57,5 +57,5 @@ class BlockListShow(Resource):
     def get(cls):
         claims = get_jwt_claims()
         if not claims['is_admin']:
-            return {'message': 'Admin privilege required.'}, 401
-        return {'users': [user.json() for user in BlockListModel.query.all()]}
+            return {"message": "Admin privilege required."}, 401
+        return {'blocked_users': [user.json() for user in BlockListModel.query.all()]}
