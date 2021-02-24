@@ -13,7 +13,7 @@ and soon will integrate with FRONTEND
 
 
 
-#https://shoppa-store-api.herokuapp.com/
+# https://shoppa-store-api.herokuapp.com/
 
 same like above, only in Heroku :)
 
