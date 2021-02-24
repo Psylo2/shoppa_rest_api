@@ -9,8 +9,8 @@ from models.user import UserModel
 from models.item import ItemModel
 from db.db import insert_timestamp, decrypt
 
-NOT_CONFIRMED_ERROR = "You have not confirmed registration, please check your email {}"
-
+NOT_CONFIRMED_ERROR = "You have not confirmed registration, " \
+                      "please check your email:    {}"
 
 class UserRegister(Resource):
     parser = reqparse.RequestParser()
